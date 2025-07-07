@@ -10,30 +10,51 @@ class World(val game: MineTheEarth) : Fun("World", game.context) {
     private val width = 21
     private val height = 21
 
-    fun worldgen(mapWidth: Int, yLevelStart: Int, yLevelEnd: Int){
+    private inline fun roll(chancePct: Float, crossinline callback: () -> Unit) {
+        if ((0..99).random() < chancePct * 100) {
+            callback()
+        }
+    }
+
+    fun worldgen(mapWidth: Int, zLevelStart: Int, zLevelEnd: Int): List<List<Block>> {
         val blocksList = BlockType.entries
 
-        val validBlocks = blocksList.filter { it.yHeight in yLevelStart until yLevelEnd }
-        val height = yLevelEnd - yLevelStart
-        val matrix = Array(height) { Array(mapWidth) { "filler block" } }
+        val validBlocks = blocksList.filter { it.zHeight in zLevelStart until zLevelEnd }
+        val height = zLevelEnd - zLevelStart
+        var fillerBlock: BlockType
+        if (zLevelStart == 0) {
+            fillerBlock = BlockType.Dirt
+        } else {
+            TODO("")
+        }
+
+        val x = Block(1,2,3)
+
+        val matrix = List(height) { z ->
+            MutableList(mapWidth) { x ->
+                Block(game, fillerBlock, BlockPos(x = x, y = 0.5f, z = z))
+            }
+        }
         val weightedBlocksList = validBlocks.flatMap { block ->
-            val weight = (block.spawnPrec * 10000).toInt().coerceAtLeast(1)
+            val weight = (block.spawnPrec * 10000).coerceAtLeast(1)
             List(weight) { block }
         }
-        for (y in 0 until height){
-            for (x in 0 until mapWidth){
-                if ((0..99).random() < 90){
+
+        // [0 - 100] - [0-100]
+        for (z in 0 until height) {
+            for (x in 0 until mapWidth) {
+                roll(10.0f) {
                     val block = weightedBlocksList.random()
-                    val vienSize = block.veinSize.random()
-                    var placed = mutableSetOf<Pair<Int, Int>>()
-                    placed.add(Pair(x,y))
+                    val veinSize = block.veinSize.random()
+                    val placed = mutableSetOf<Pair<Int, Int>>()
+                    placed.add(Pair(x, z))
                     while (placed.size < veinSize) {
                         val vblock = placed.random()
-                        var vx = vblock.first + (-1..1).random()
-                        var vy = vblock.second + (-1..1).random()
+                        val vx = vblock.first + (-1..1).random()
+                        val vy = vblock.second + (-1..1).random()
                         if (vx in 0 until mapWidth && vy in 0 until height && Pair(vx, vy) !in placed) {
                             placed.add(Pair(vx, vy))
-                            matrix[vy][vx] = block.name
+                            matrix[vy][vx] = block
                         }
                     }
                 }

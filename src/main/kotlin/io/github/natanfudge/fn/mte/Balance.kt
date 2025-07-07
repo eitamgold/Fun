@@ -16,15 +16,21 @@ object Balance {
     val PickaxeStrength = 1f
 }
 
-val BlockType.yHeight : Int get() = when(this) {
+val BlockType.zHeight : Int get() = when(this) {
     BlockType.Dirt -> 1
     BlockType.Gold -> 2
 
 }
 
-val BlockType.spawn : Int get() = when(this) {
+val BlockType.spawnPrec : Int get() = when(this) {
     BlockType.Dirt -> 1
     BlockType.Gold -> 2
+
+}
+
+val BlockType.veinSize : IntRange get() = when(this) {
+    BlockType.Dirt -> 1..4
+    BlockType.Gold -> 2..3
 
 }
 
